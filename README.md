@@ -44,7 +44,7 @@ This project **is not** intended for:
 
 - Add individual files or entire folders to an ISO image structure.
 - Set a custom `BOOT.ELF` file for launching on PS2.
-- Generate standard ISO images usable with emulators or real hardware.
+- Generate standard ISO images with `genisoimage` usable with emulators or real hardware.
 - CLI-driven with a minimal GUI available.
 
 ---
