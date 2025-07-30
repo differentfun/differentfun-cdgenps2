@@ -100,6 +100,14 @@ bash install_libraries.sh
    ```bash
    ./run_cdgenps2.sh
    ```
+5. Iso construction
+
+   Insert the needed files, then select the .ELF that has to boot
+   Then click on `Set as Main ELF boot`, this will generate the SYSTEM.CNF with the boot informations.
+   
+7. You're done
+
+   Now you can build the ISO.
 
 ## 🙏 Acknowledgements
 
