@@ -1,0 +1,83 @@
+# differentfun-cdgenps2
+
+A modern, Python-based reimplementation of the classic **CDGenPS2** tool for PlayStation 2.  
+This project is aimed at **educational and research purposes**, helping developers build and test **homebrew** PS2 software.
+
+---
+
+## ⚠️ Disclaimer
+
+This software is provided **strictly for educational and non-commercial purposes**.
+
+- It is **not affiliated with, endorsed by, or associated with Sony Computer Entertainment Inc.** or any of its subsidiaries.
+- It must **not** be used to create, distribute, or facilitate the distribution of copyrighted material.
+- The author does **not condone** piracy or any illegal use of this tool.
+- By using this software, **you agree** to comply with all applicable laws and regulations in your country or region.
+
+---
+
+## 🎯 Intended Use
+
+This tool is designed for:
+- Developers creating and testing **homebrew** applications for PlayStation 2.
+- Researchers or enthusiasts exploring how PS2 disc structures and bootable ISOs work.
+- Educational exploration of old console development practices using modern Python code.
+
+This project **is not** intended for:
+- Running or copying commercial games.
+- Circumventing copy protection mechanisms.
+- Any activity that violates intellectual property laws.
+
+---
+
+## 🛠 Features
+
+- Add individual files or entire folders to an ISO image structure.
+- Set a custom `BOOT.ELF` file for launching on PS2.
+- Generate standard ISO images usable with emulators or real hardware.
+- CLI-driven with a minimal GUI available.
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.  
+See the `LICENSE` file for full legal terms.
+
+---
+
+
+## 🐍 Requirements
+
+- Python 3.11+
+- See `requirements.txt` for required packages.
+
+You can install dependencies via:
+
+```bash
+bash install_libraries.sh
+```
+
+Or manually:
+
+```bash
+pip install -r requirements.txt
+```
+---
+
+## 🚀 Usage
+1. Activate virtual environment
+``` bash
+source activate_venv.sh
+```
+
+2. Run the tool
+```bash
+python main.py
+```
+
+## 🙏 Acknowledgements
+
+Inspired by the original CDGenPS2 utility.
+
+---
