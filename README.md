@@ -78,15 +78,28 @@ bash install_libraries.sh
 ---
 
 ## 🚀 Usage
-1. Set-up virtual environment
-``` bash
-./setup_env.sh
-```
+1. Clone this repo:
+   ```bash
+   git clone https://github.com/differentfun/differentfun-cdgenps2
+   ```
+   ```bash
+   cd differentfun-cdgenps2
+   ```
 
-2. Run the tool
-```bash
-./run_cdgenps2.sh
-```
+2. Install the dependencies (works only on debian based distros)
+   ```bash
+   bash install_libraries.sh
+   ```
+
+3. Set-up virtual environment
+   ``` bash
+   ./setup_env.sh
+   ```
+
+4. Run the tool
+   ```bash
+   ./run_cdgenps2.sh
+   ```
 
 ## 🙏 Acknowledgements
 
