@@ -15,7 +15,8 @@ This software is provided **strictly for educational and non-commercial purposes
 - It must **not** be used to create, distribute, or facilitate the distribution of copyrighted material.
 - The author does **not condone** piracy or any illegal use of this tool.
 - By using this software, **you agree** to comply with all applicable laws and regulations in your country or region.
-
+- The developer of this tool is not responsible for how it is used. Users are solely responsible for ensuring their use of the software complies with all applicable laws and ethical standards.
+ 
 ---
 
 ## 🎯 Intended Use
