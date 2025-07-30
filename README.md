@@ -35,9 +35,8 @@ This project **is not** intended for:
 
 ## 🧬 Status Informations
 
-- The tool is in Pre-Alpha, it still have to be tested, etc. 
-- I didn't check yet if the generated iso will work, eventually I'll do it when I have some free time.
-- Expect frequent updates.
+- The tool is in Alpha, it has been tested with uLaunchELF and works but you have to disable the FastBoot 
+- Full boot will make the generated iso work with no problems 
 
 ---
 
@@ -75,22 +74,17 @@ You can install dependencies via:
 bash install_libraries.sh
 ```
 
-Or manually:
-
-```bash
-pip install -r requirements.txt
-```
 ---
 
 ## 🚀 Usage
-1. Activate virtual environment
+1. Set-up virtual environment
 ``` bash
-source activate_venv.sh
+./setup_env.sh
 ```
 
 2. Run the tool
 ```bash
-python main.py
+./run_cdgenps2.sh
 ```
 
 ## 🙏 Acknowledgements

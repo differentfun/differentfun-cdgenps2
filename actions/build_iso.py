@@ -1,127 +1,113 @@
 # actions/build_iso.py
-"""Build the PlayStation 2 ISO image *with* user‑interface feedback."""
+import subprocess, os, logging, threading, traceback
+from typing import List, Tuple, Optional
+from PySide6.QtCore import QObject, Signal, QThread, Slot, Qt
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-from __future__ import annotations
-import os, traceback
-from typing import List, Tuple, Optional, TYPE_CHECKING
+logger = logging.getLogger("buildiso")
+VOLUME_ID = "PS2DISC"
 
-from PySide6.QtCore   import QThread, QObject, Signal
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QProgressDialog
+# ------------------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------------------
 
-from iso_builder import create_ps2_iso_with_lba
-
-if TYPE_CHECKING:  # pragma: no cover
-    from gui import CDGenPS2
-
-# --------------------------------------------------------------------------- #
-# Sanity‑check helper  ← NEW
-# --------------------------------------------------------------------------- #
-def _sanitise_and_sort(
-    files: List[Tuple[str, str, Optional[int]]],
-) -> List[Tuple[str, str, Optional[int]]]:
-    """Validate layout, then return it ordered by LBA / insertion."""
-    seen: set[str] = set()
-    ordered: List[Tuple[str, str, Optional[int]]] = []
-
+def _sanitise_and_sort(files: List[Tuple[str, str, Optional[int]]]):
+    seen = set()
+    ordered = []
     for iso_rel, abs_path, lba in files:
         if iso_rel in seen:
             raise ValueError(f"Duplicate ISO path: {iso_rel}")
-        seen.add(iso_rel)
-
         if not os.path.isfile(abs_path):
             raise FileNotFoundError(abs_path)
-
-        ordered.append((iso_rel, abs_path, lba))
-
-    # Explicit LBA first (ascending), then the rest in original order
-    ordered.sort(key=lambda t: (1 if t[2] is None else 0, t[2] or 0))
+        seen.add(iso_rel)
+        ordered.append((iso_rel, abs_path))
     return ordered
 
-# --------------------------------------------------------------------------- #
-# Worker thread
-# --------------------------------------------------------------------------- #
+def _build_iso(output_path: str, files: List[Tuple[str, str]]):
+    logger.debug("Thread %s – building ISO with genisoimage", threading.get_ident())
+
+    cmd = [
+        "genisoimage",
+        "-udf",
+        "-o", output_path,
+        "-iso-level", "1",
+        "-pad",
+        "-V", VOLUME_ID,
+        "-graft-points"
+    ]
+    for iso_rel, abs_path in files:
+        graft = f"/{iso_rel.upper()}={abs_path}"
+        cmd.append(graft)
+    
+    
+    logger.info("Running command: %s", " ".join(cmd))
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        raise RuntimeError(f"genisoimage failed with code {result.returncode}")
+
+    logger.info("ISO written to %s", output_path)
+
+# ------------------------------------------------------------------------------
+# Worker
+# ------------------------------------------------------------------------------
+
 class _IsoBuildWorker(QObject):
     finished = Signal(str)
-    error    = Signal(str)
+    error = Signal(str)
 
-    def __init__(
-        self,
-        output_path: str,
-        files_with_lba: List[Tuple[str, Optional[int]]],
-    ) -> None:
+    def __init__(self, out_path: str, files):
         super().__init__()
-        self._output_path   = output_path
-        self._files_with_lba = files_with_lba
+        self._out = out_path
+        self._files = files
 
-    def run(self) -> None:  # executed in worker thread
+    @Slot()
+    def run(self):
         try:
-            create_ps2_iso_with_lba(self._output_path, self._files_with_lba)
-        except Exception as exc:  # propagate full traceback
+            _build_iso(self._out, self._files)
+        except Exception as exc:
             self.error.emit(f"{exc}\n\n{traceback.format_exc()}")
-            return
-        self.finished.emit(self._output_path)
+        else:
+            self.finished.emit(self._out)
 
-# --------------------------------------------------------------------------- #
-# GUI entry‑point
-# --------------------------------------------------------------------------- #
-def build_iso(gui: "CDGenPS2") -> None:  # noqa: D401
-    """Collect files from GUI, validate, and build the ISO in a thread."""
+# ------------------------------------------------------------------------------
+# GUI entry-point
+# ------------------------------------------------------------------------------
+
+def build_iso(gui: "CDGenPS2") -> None:
     if not gui.files:
-        QMessageBox.warning(gui, "No content",
-                            "Add at least one file before building the ISO.")
+        QMessageBox.warning(gui, "No content", "Add at least one file before building the ISO.")
         return
 
-    # 1) validate & sort
     try:
-        sorted_files = _sanitise_and_sort(gui.files)
-    except Exception as err:
-        QMessageBox.critical(gui, "Invalid layout", str(err))
+        files = _sanitise_and_sort(gui.files)
+    except Exception as e:
+        QMessageBox.critical(gui, "Invalid layout", str(e))
         return
 
-    # 2) choose output path
-    save_path, _ = QFileDialog.getSaveFileName(
-        gui, "Save ISO as…", "output.iso", "ISO (*.iso)"
-    )
+    save_path, _ = QFileDialog.getSaveFileName(gui, "Save ISO as…", "output.iso", "ISO (*.iso)")
     if not save_path:
         return
 
-    # 3) progress dialog + worker thread
-    progress = QProgressDialog("Building ISO…", "Cancel", 0, 0, gui)
-    progress.setWindowModality(progress.WindowModal)
-    progress.setMinimumDuration(0)
-    progress.setValue(0)  # indeterminate
-
-    worker = _IsoBuildWorker(
-        save_path,
-        [(abs_path, lba) for _iso_rel, abs_path, lba in sorted_files],
-    )
+    worker = _IsoBuildWorker(save_path, files)
     thread = QThread()
     worker.moveToThread(thread)
+
+    # --- Callbacks ---
+    def on_success(path: str):
+        QMessageBox.information(gui, "Success", f"ISO created at:\n{path}")
+        cleanup()
+
+    def on_failure(msg: str):
+        QMessageBox.critical(gui, "Build error", msg)
+        cleanup()
+
+    def cleanup():
+        thread.quit()
+        thread.wait()
+        worker.deleteLater()
+        thread.deleteLater()
+
+    worker.finished.connect(on_success)
+    worker.error.connect(on_failure)
     thread.started.connect(worker.run)
-
-    # success
-    worker.finished.connect(
-        lambda path: (
-            progress.close(),
-            QMessageBox.information(gui, "Success",
-                                    f"ISO successfully created:\n{path}"),
-            thread.quit(), thread.wait()
-        )
-    )
-    # error
-    worker.error.connect(
-        lambda msg: (
-            progress.close(),
-            QMessageBox.critical(gui, "Build error", msg),
-            thread.quit(), thread.wait()
-        )
-    )
-    # cancellation
-    progress.canceled.connect(
-        lambda: (thread.requestInterruption(),
-                 progress.setLabelText("Cancelling…"))
-    )
-
-    # 4) launch
     thread.start()
-    progress.exec()

@@ -44,16 +44,15 @@ CNF_LBA: int = 12231
 # --------------------------------------------------------------------------- #
 
 def _make_cnf_content(iso_path: str) -> str:
-    """Return the text for *SYSTEM.CNF* given an ELF ISO path."""
-    # PS2 expects backslashes and version suffix ;1
+    """Return the text for SYSTEM.CNF given an ELF ISO path."""
     elf_path_cnf = iso_path.replace("/", "\\")
     if not elf_path_cnf.endswith(";1"):
         elf_path_cnf += ";1"
 
     return (
-        f"BOOT2 = cdrom0:\\{elf_path_cnf}\n"
-        "VER   = 1.00\n"
-        "VMODE = NTSC\n"
+        f"BOOT2=cdrom0:\\{elf_path_cnf}\n"
+        "VER=1.00\n"
+        "VMODE=NTSC\n"
     )
 
 

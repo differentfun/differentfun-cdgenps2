@@ -40,32 +40,36 @@ def _norm_iso_name(name: str) -> Tuple[str, bool]:
 # Public entry‑point
 # --------------------------------------------------------------------------- #
 
-def add_file(gui: "CDGenPS2") -> None:  # noqa: D401
-    file_path, _ = QFileDialog.getOpenFileName(
-        gui, "Select file to add", "", "All files (*)"
+def add_file(gui: "CDGenPS2") -> None:
+    file_paths, _ = QFileDialog.getOpenFileNames(
+        gui, "Select file(s) to add", "", "All files (*)"
     )
-    if not file_path:
+    if not file_paths:
         return
 
-    file_name = os.path.basename(file_path)
-    iso_name, changed = _norm_iso_name(file_name)
+    added = 0
+    for file_path in file_paths:
+        file_name = os.path.basename(file_path)
+        iso_name, changed = _norm_iso_name(file_name)
 
-    if changed:
-        QMessageBox.information(
-            gui,
-            "Name adjusted",
-            f"The file name was adapted for ISO‑9660:\n{file_name} → {iso_name}",
-        )
+        if any(entry[0] == iso_name for entry in gui.files):
+            continue  # skip duplicates silently
 
-    # Prevent duplicates
-    if any(entry[0] == iso_name for entry in gui.files):
-        QMessageBox.warning(gui, "Duplicate", f"{iso_name} already exists in the ISO.")
-        return
+        if changed:
+            QMessageBox.information(
+                gui,
+                "Name adjusted",
+                f"The file name was adapted for ISO‑9660:\n{file_name} → {iso_name}",
+            )
 
-    # Update tree
-    node = QTreeWidgetItem([iso_name])
-    node.setData(0, Qt.UserRole, (iso_name, file_path, None))
-    gui.root_node.addChild(node)
-    gui.tree.setCurrentItem(node)
+        node = QTreeWidgetItem([iso_name])
+        node.setData(0, Qt.UserRole, (iso_name, file_path, None))
+        gui.root_node.addChild(node)
 
-    gui.files.append((iso_name, file_path, None))
+        gui.files.append((iso_name, file_path, None))
+        added += 1
+
+    if added:
+        gui.tree.setCurrentItem(node)
+    else:
+        QMessageBox.information(gui, "No files added", "All selected files were duplicates.")
