@@ -1,7 +1,9 @@
 # differentfun-cdgenps2
 
-A modern, Python-based reimplementation of the classic **CDGenPS2** tool for PlayStation 2.  
-This project is aimed at **educational and research purposes**, helping developers build and test **homebrew** PS2 software.
+A modern, Python-based reimplementation of the classic CDGenPS2 tool for PlayStation 2.
+This project is aimed at educational and research purposes, helping developers build and test homebrew PS2 software.
+The goal is not to clone CDGenPS2, but simply to provide a way for users to create bootable ISO images with custom .ELF files.
+This is especially useful for those who want to develop and run their own software on real PS2 hardware or emulators.
 
 ---
 
