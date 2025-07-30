@@ -30,6 +30,14 @@ This project **is not** intended for:
 
 ---
 
+## 🧬 Status Informations
+
+- The tool is in Pre-Alpha, it still have to be tested, etc. 
+- I didn't check yet if the generated iso will work, eventually I'll do it when I have some free time.
+- Expect frequent updates.
+
+---
+
 ## 🛠 Features
 
 - Add individual files or entire folders to an ISO image structure.
