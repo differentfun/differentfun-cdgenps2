@@ -67,6 +67,7 @@ See the `LICENSE` file for full legal terms.
 
 - Python 3.11+
 - See `requirements.txt` for required packages.
+- libxcb1 libx11-xcb1 libxcb-render0 libxcb-shape0 libxcb-xfixes0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0
 
 You can install dependencies via:
 
